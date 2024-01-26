@@ -1,0 +1,2 @@
+# GCPAPIClientLibrary
+Google Cloud Platformをpythonなどの言語から使用するにAPI Client Libraryを使いやすいように整えたrepository。
