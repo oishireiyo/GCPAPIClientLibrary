@@ -144,13 +144,17 @@ class GoogleCloudVision(object):
 
     self.error_handling(response=response)
 
+    return faces
+
   def detect_faces_localpath(self, image_path: str):
     image = self.create_image_localpath(image_path=image_path)
-    self._detect_faces_payload(image=image)
+    faces = self._detect_faces_payload(image=image)
+    return faces
 
   def detect_faces_url(self, url: str):
     image = self.create_image_url(url=url)
-    self._detect_faces_payload(image=image)
+    faces = self._detect_faces_payload(image=image)
+    return faces
 
   # 画像プロパティの検出
   def _detect_properties_payload(self, image):
@@ -352,4 +356,4 @@ class GoogleCloudVision(object):
 
 if __name__ == '__main__':
   obj = GoogleCloudVision()
-  obj.detect_text_localpath(image_path='../assets/smple.png')
+  obj.detect_faces_localpath(image_path='../assets/kasu_frame_11400.png')
