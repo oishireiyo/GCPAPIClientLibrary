@@ -163,5 +163,5 @@ class GoogleCloudLanguage_v2(object):
     print(f'Language of the text: {response.language_code}')
 
 if __name__ == '__main__':
-  obj = GoogleCloudLanguage_v2()
-  obj.get_entities(text='', language_code='ja')
+  nlp = GoogleCloudLanguage_v1()
+  nlp.get_syntax(text='今年の干支は獅子です。東京オリンピックが楽しみだなあ。')
