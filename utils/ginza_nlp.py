@@ -14,6 +14,8 @@ stream_handler.setFormatter(handler_format)
 logger.addHandler(stream_handler)
 
 # Advanced modules
+import matplotlib.pyplot as plt
+plt.rcParams['font.family'] = 'Hiragino Maru Gothic Pro' # 日本語をプロット内部に記述するため
 import spacy
 from spacy import displacy
 from spacy.pipeline import EntityRuler
@@ -52,6 +54,7 @@ class GiNZANaturalLanguageProcessing(object):
   # 形態素解析
   def print_token_syntaxes(self, text: str) -> None:
     '''
+    https://qiita.com/kei_0324/items/400f639b2f185b39a0cf
     https://spacy.io/api/token
     * token.i: トークン番号
     * token.orth_: オリジナルテキスト
@@ -68,6 +71,7 @@ class GiNZANaturalLanguageProcessing(object):
     *   | DET   | 限定詞　　　　　| 名詞をより明確に示す　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　| 一つの　　　　　　　　　　　|
     *   | INTJ  | 感嘆詞　　　　　| 「！」　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　| 　　　　　　　　　　　　　　|
     *   | NOUN  | 名詞　　　　　　| 物体、物質、人名、場所など　　　　　　　　　　　　　　　　　　　　　　　　　　　　　| 水、犬、東京　　　　　　　　|
+    *   | NUM   | 数詞　　　　　　| ０、１０００　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　| 　　　　　　　　　　　　　　|
     *   | PART  | 助詞　　　　　　| 言葉に意味を肉付けする　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　| 〜を、〜が　　　　　　　　　|
     *   | PPON  | 固有名詞　　　　| 一つの特定の単勝を指示する　　　　　　　　　　　　　　　　　　　　　　　　　　　　　| モト冬樹　　　　　　　　　　|
     *   | PROPN | 代名詞　　　　　| 名詞または名詞句の代わりに用いられる　　　　　　　　　　　　　　　　　　　　　　　　| 私、これ、そこ　　　　　　　|
@@ -91,6 +95,47 @@ class GiNZANaturalLanguageProcessing(object):
     * token.n_lefts: 関連語(左)の数
     * token.n_rights: 関連語(右)の数
     * token.dep_: 係受けの関連性
+    *   ----------------------------------------
+    *   | tag        | 意味　　　　　　　　　　　　　　|
+    *   ----------------------------------------
+    *   | acl        | 名詞節修飾語　　　　　　　　　　|
+    *   | advcl      | 副詞節修飾語　　　　　　　　　　|
+    *   | advmod     | 副詞修飾語　　　　　　　　　　　|
+    *   | amod       | 形容詞修飾語　　　　　　　　　　|
+    *   | appos      | 同格　　　　　　　　　　　　　　|
+    *   | aux        | 助動詞　　　　　　　　　　　　　|
+    *   | case       | 格表示　　　　　　　　　　　　　|
+    *   | cc         | 等位接続詞　　　　　　　　　　　|
+    *   | ccomp      | 捕文　　　　　　　　　　　　　　|
+    *   | clf        | 類別詞　　　　　　　　　　　　　|
+    *   | compound   | 複合名詞　　　　　　　　　　　　|
+    *   | conj       | 結合詞　　　　　　　　　　　　　|
+    *   | cop        | 連結詞　　　　　　　　　　　　　|
+    *   | csubj      | 主部　　　　　　　　　　　　　　|
+    *   | dep        | 不明な依存関係　　　　　　　　　|
+    *   | det        | 限定詞　　　　　　　　　　　　　|
+    *   | discourse  | 談話要素　　　　　　　　　　　　|
+    *   | dislocated | 転置　　　　　　　　　　　　　　|
+    *   | expl       | 嘘辞　　　　　　　　　　　　　　|
+    *   | fixed      | 固定複数単語表現　　　　　　　　|
+    *   | flat       | 同格複数単語表現　　　　　　　　|
+    *   | goeswith   | 一単語分割表現　　　　　　　　　|
+    *   | iobj       | 間接目的語　　　　　　　　　　　|
+    *   | list       | リスト表現　　　　　　　　　　　|
+    *   | mark       | 接続詞　　　　　　　　　　　　　|
+    *   | nmod       | 名詞修飾語　　　　　　　　　　　|
+    *   | nsubj      | 主語名詞　　　　　　　　　　　　|
+    *   | nummod     | 数詞修飾語　　　　　　　　　　　|
+    *   | obj        | 目的語　　　　　　　　　　　　　|
+    *   | obl        | 斜格名詞　　　　　　　　　　　　|
+    *   | orphan     | 独立関係　　　　　　　　　　　　|
+    *   | parataxis  | 並列　　　　　　　　　　　　　　|
+    *   | punct      | 句読点　　　　　　　　　　　　　|
+    *   | reparandu  | 単語として認識されない単語表現　|
+    *   | root       | 文の根　　　　　　　　　　　　　|
+    *   | vocation   | 発声関係　　　　　　　　　　　　|
+    *   | xcomp      | 補体　　　　　　　　　　　　　　|
+    *   ----------------------------------------
     * token.head.i: 係受けの相手トークン番号
     * token.head.text: 係受けの相手テキスト
     '''
@@ -117,10 +162,10 @@ class GiNZANaturalLanguageProcessing(object):
     for sent in doc.sents:
       for token in sent:
         if symbols is None:
-          dependencies.append((token, token.head, token.children))
+          dependencies.append((token, token.dep_, token.head, token.head.i))
         else:
           if token.dep_ in symbols:
-            dependencies.append((token, token.head, token.children))
+            dependencies.append((token, token.dep_, token.head, token.head.i))
     return dependencies
 
   def get_all_token_syntaxes(self, text: str) -> list[tuple]:
@@ -130,6 +175,70 @@ class GiNZANaturalLanguageProcessing(object):
   def get_subject_token_syntaxes(self, text: str) -> list[tuple]:
     dependencies = self._get_token_syntaxes(text=text, symbols=['nsubj', 'iobj'])
     return dependencies
+
+  def convert_token_pos_UID_to_jp(self, uid: Union[str, None]=None) -> str:
+    uid_to_jp = {
+      'ADJ': '形容詞',
+      'ADP': '接置詞',
+      'ADV': '副詞',
+      'AUX': '助動詞',
+      'CCONJ': '接続詞',
+      'DET': '限定詞',
+      'INTJ': '感嘆符',
+      'NOUN': '名詞',
+      'NUM': '数詞',
+      'PART': '助詞',
+      'PRON': '固有名詞',
+      'PROPN': '代名詞',
+      'PUNCT': '句読点',
+      'SCONJ': '従属接続詞',
+      'SYM': '記号',
+      'VERB': '動詞',
+      'X': 'その他',
+    }
+    return uid_to_jp if uid is None else uid_to_jp[uid.upper()]
+
+  def convert_token_dep_UID_to_jp(self, uid: Union[str, None]=None) -> str:
+    uid_to_jp = {
+      'acl': '名詞節修飾語',
+      'advcl': '副詞節修飾語',
+      'advmod': '副詞修飾語',
+      'amod': '形容詞修飾語',
+      'appos': '同格',
+      'aux': '助動詞',
+      'case': '格表現',
+      'cc': '等位接続詞',
+      'ccomp': '捕文',
+      'clf': '類別詞',
+      'compound': '複合名詞',
+      'conj': '結合詞',
+      'cop': '連結詞',
+      'csubj': '主部',
+      'dep': '不明な依存関係',
+      'det': '限定詞',
+      'discourse': '談話要素',
+      'dislocated': '転置',
+      'expl': '嘘辞',
+      'fixed': '固定複数単語表現',
+      'flat': '同格複数単語表現',
+      'goeswith': '一単語分割表現',
+      'iobj': '間接目的語',
+      'list': 'リスト表現',
+      'mark': '接続詞',
+      'nmod': '名詞修飾語',
+      'nsubj': '主語名詞',
+      'nummod': '数詞修飾語',
+      'obj': '目的語',
+      'obl': '斜格名詞',
+      'orphan': '独立関係',
+      'parataxis': '並列',
+      'punct': '句読点',
+      'reparandu': '単語として認識されない単語表現',
+      'root': '文の根',
+      'vocation': '発声関係',
+      'xcomp': '補体',
+    }
+    return uid_to_jp if uid is None else uid_to_jp[uid.lower()]
 
   # 固有表現抽出
   def print_named_entities(self, text: str) -> None:
@@ -178,8 +287,6 @@ class GiNZANaturalLanguageProcessing(object):
     results = []
     for sent in doc.sents:
       # 1文ごとに改行表示(センテンス区切り表示)
-      print(sent)
-
       # 各文を解析して結果をlistに入れる(文章が複数ある場合も一まとめにする)
       for token in sent:
         info_dict = {}
@@ -214,25 +321,169 @@ class GiNZANaturalLanguageProcessing(object):
     doc = self.nlp(text)
     displacy.serve(doc, style='ent', port=port)
 
+  def display_token_parts_of_speech(self, text: str, plot_name: str):
+    doc = self.nlp(text)
+
+    pos = []
+    for sent in doc.sents:
+      for token in sent:
+        pos.append(token.pos_)
+    pos_counts = {self.convert_token_pos_UID_to_jp(uid=x): pos.count(x) for x in set(pos)}
+
+    plt.figure()
+    plt.bar(pos_counts.keys(), pos_counts.values(), color='skyblue')
+    plt.title('テキスト内で見つかった品詞')
+    plt.xticks(rotation=90)
+    plt.xlabel('品詞')
+    plt.ylabel('見つかった数')
+    plt.grid(True)
+    plt.subplots_adjust(bottom=0.25)
+    plt.savefig(plot_name)
+
+  def display_token_dependencies(self, text: str, plot_name: str):
+    doc = self.nlp(text)
+
+    dep = []
+    for sent in doc.sents:
+      for token in sent:
+        dep.append(token.dep_)
+    dep_counts = {self.convert_token_dep_UID_to_jp(uid=x): dep.count(x) for x in set(dep)}
+
+    plt.figure()
+    plt.bar(dep_counts.keys(), dep_counts.values(), color='darkorange')
+    plt.title('テキスト内で見つかった依存関係')
+    plt.xticks(rotation=90)
+    plt.xlabel('依存関係')
+    plt.ylabel('見つかった数')
+    plt.grid(True)
+    plt.subplots_adjust(bottom=0.33)
+    plt.savefig(plot_name)
+
+  def display_token_pos_connections(self, text: str, plot_name: str):
+    doc = self.nlp(text)
+
+    pos_from = []
+    pos_to = []
+    for sent in doc.sents:
+      for token in sent:
+        pos_from.append(self.convert_token_pos_UID_to_jp(token.pos_))
+        pos_to.append(self.convert_token_pos_UID_to_jp(token.head.pos_))
+
+    mapping_pos_from = {val: i for i, val in enumerate(sorted(set(pos_from)))}
+    mapping_pos_to = {val: i for i, val in enumerate(sorted(set(pos_to)))}
+
+    numeric_pos_from = [mapping_pos_from[val] for val in pos_from]
+    numeric_pos_to = [mapping_pos_to[val] for val in pos_to]
+
+    bin_label_pos_from = sorted(set(pos_from))
+    bin_label_pos_to = sorted(set(pos_to))
+
+    plt.figure()
+    plt.hist2d(numeric_pos_to, numeric_pos_from, bins=(len(mapping_pos_to), len(mapping_pos_from)), cmap='plasma')
+    plt.colorbar(label='頻度')
+    plt.title('係受けの構造')
+    plt.xticks(range(len(bin_label_pos_to)), bin_label_pos_to, rotation=90)
+    plt.yticks(range(len(bin_label_pos_from)), bin_label_pos_from, rotation=0)
+    plt.xlabel('係受け元の品詞')
+    plt.ylabel('係受け先の品詞')
+    plt.grid()
+    plt.subplots_adjust(left=0.20, bottom=0.33)
+    plt.savefig(plot_name)
+
 if __name__ == '__main__':
   parser = GiNZANaturalLanguageProcessing()
-  sentences = parser.get_sentences(text='この商品はよく効きます。この商品はよく売れます。')
-  bunsetu = parser.get_bunsetu_spans(text='この商品はよく効きます。この商品はよく売れます。')
-  bunsetu_phrase = parser.get_bunsetu_phrase_spans(text='この商品はよく効きます。この商品はよく売れます。')
-  bunsetu_dependencies = parser.get_bunsetu_syntaxes(text='この商品はよく効きます。この商品はよく売れます。')
+  # sentences = parser.get_sentences(text='この商品はよく効きます。この商品はよく売れます。')
+  # bunsetu = parser.get_bunsetu_spans(text='この商品はよく効きます。この商品はよく売れます。')
+  # bunsetu_phrase = parser.get_bunsetu_phrase_spans(text='この商品はよく効きます。この商品はよく売れます。')
+  # bunsetu_dependencies = parser.get_bunsetu_syntaxes(text='この商品はよく効きます。この商品はよく売れます。')
 
-  parser.print_token_syntaxes(text='昨日から胃がキリキリと痛い。ただ、熱は無い。')
-  parser.print_token_syntaxes(text='No1にならなくても良い、もともと特別なオンリーワン。')
-  subject_list = parser.get_all_token_syntaxes(text='この商品はよく効きます。この商品はよく売れます。')
+  # parser.print_token_syntaxes(text='昨日から胃がキリキリと痛い。ただ、熱は無い。')
+  # parser.print_token_syntaxes(text='No.1にならなくても良い、もともと特別なオンリーワン。')
+  # subject_list = parser.get_all_token_syntaxes(text='この商品はよく効きます。この商品はよく売れます。')
 
-  parser.add_named_entries(
-    rules=[
-      {'label': 'Person', 'pattern': 'サツキ'},
-      {'label': 'Person', 'pattern': 'メイ'},
-    ]
+  # parser.add_named_entries(
+  #   rules=[
+  #     {'label': 'Person', 'pattern': 'サツキ'},
+  #     {'label': 'Person', 'pattern': 'メイ'},
+  #   ]
+  # )
+  # parser.print_named_entities(
+  #   text='小学生のサツキと妹のメイは、母の療養のために父と一緒に初夏の頃の農村へ引っ越してくる。'
+  # )
+  # entries = parser.get_named_entries(text='小学生のサツキと妹のメイは、母の療養のために父と一緒に初夏の頃の農村へ引っ越してくる。')
+  # parser.print_noun_chunks(text='錦織圭選手は偉大なテニス選手です。')
+
+  parser.display_token_parts_of_speech(
+    text=(
+      '家賃の安さや、色んな国と人と交流が持てるとの理由が人気を呼び、今ゲストハウスを利用する人が増えて'
+      'います。ゲストハウスを利用するメリットととしては、1つは費用面です。東京近辺でも家賃が5万円程度'
+      'で済む場合もありますし、賃貸しのアパートやマンションでかかる、敷金や礼金も掛からないことがほとんど'
+      'です。とにかく、家賃を安く済ませたという方には非常におすすめです。'
+      '2つ目は出会いの場になる点です。実家を出て、一人暮らしを始めると最初は友達も出来ず、なかなか心細い'
+      '状態になりがちです。新しい環境で積極的にいろんな人に声を掛けるのも難しいと思います。'
+      'しかしゲストハウスはその家賃の安さから、海外の方、色んな年齢の方が利用しており、家にいながら沢山の人'
+      'とコミュニケーションをとることが出来ます。ゲストハウスで知り合って結婚した、というカップルも少なく'
+      'ありません。女性の方でセキュリティ面で心配に思う方がいれば、女性専用のゲストハウスに住むのもよいでしょう。'
+      'ゲストハウスを利用する際の注意点としては、いろんな方が共同で暮らし、水周りを共有する事になるので、'
+      'そのゲストハウスに設けられたルールに従わなければならないという点です。好きな時間にご飯を作ったりは'
+      '出来ないかもしれませんし、シャワーの設置数が少ない場合は自分の好きなときに入ることはできません。'
+      'もちろん共同で使いますので、汚したり散らかしたりするのはご法度。あとの人が気持ちよく使えるよう、'
+      '共同施設は綺麗に使う必要があります。また、これはゲストハウスに限ったことではありませんが、友達を'
+      '連れてきて夜中まで騒ぐなども出来ません。'
+      'このように一緒に暮らす人に迷惑をかけないように生活しなければなりませんので、自分の思い通りにしたい人'
+      'にはあまり向きません。ゲストハウスは良い点も沢山ありますが、共同生活ならではの注意点もあります。'
+      'ゲストハウスで暮らすことを検討する際には、この暮らしのスタイルが本当に自分にあっているかどうかをまず'
+      '確かめてからにするようにしましょう。'
+    ),
+    plot_name='pos.png',
   )
-  parser.print_named_entities(
-    text='小学生のサツキと妹のメイは、母の療養のために父と一緒に初夏の頃の農村へ引っ越してくる。'
+
+  parser.display_token_dependencies(
+    text=(
+      '家賃の安さや、色んな国と人と交流が持てるとの理由が人気を呼び、今ゲストハウスを利用する人が増えて'
+      'います。ゲストハウスを利用するメリットととしては、1つは費用面です。東京近辺でも家賃が5万円程度'
+      'で済む場合もありますし、賃貸しのアパートやマンションでかかる、敷金や礼金も掛からないことがほとんど'
+      'です。とにかく、家賃を安く済ませたという方には非常におすすめです。'
+      '2つ目は出会いの場になる点です。実家を出て、一人暮らしを始めると最初は友達も出来ず、なかなか心細い'
+      '状態になりがちです。新しい環境で積極的にいろんな人に声を掛けるのも難しいと思います。'
+      'しかしゲストハウスはその家賃の安さから、海外の方、色んな年齢の方が利用しており、家にいながら沢山の人'
+      'とコミュニケーションをとることが出来ます。ゲストハウスで知り合って結婚した、というカップルも少なく'
+      'ありません。女性の方でセキュリティ面で心配に思う方がいれば、女性専用のゲストハウスに住むのもよいでしょう。'
+      'ゲストハウスを利用する際の注意点としては、いろんな方が共同で暮らし、水周りを共有する事になるので、'
+      'そのゲストハウスに設けられたルールに従わなければならないという点です。好きな時間にご飯を作ったりは'
+      '出来ないかもしれませんし、シャワーの設置数が少ない場合は自分の好きなときに入ることはできません。'
+      'もちろん共同で使いますので、汚したり散らかしたりするのはご法度。あとの人が気持ちよく使えるよう、'
+      '共同施設は綺麗に使う必要があります。また、これはゲストハウスに限ったことではありませんが、友達を'
+      '連れてきて夜中まで騒ぐなども出来ません。'
+      'このように一緒に暮らす人に迷惑をかけないように生活しなければなりませんので、自分の思い通りにしたい人'
+      'にはあまり向きません。ゲストハウスは良い点も沢山ありますが、共同生活ならではの注意点もあります。'
+      'ゲストハウスで暮らすことを検討する際には、この暮らしのスタイルが本当に自分にあっているかどうかをまず'
+      '確かめてからにするようにしましょう。'
+    ),
+    plot_name='dep.png',
   )
-  entries = parser.get_named_entries(text='小学生のサツキと妹のメイは、母の療養のために父と一緒に初夏の頃の農村へ引っ越してくる。')
-  parser.print_noun_chunks(text='錦織圭選手は偉大なテニス選手です。')
+
+  parser.display_token_pos_connections(
+    text=(
+      '家賃の安さや、色んな国と人と交流が持てるとの理由が人気を呼び、今ゲストハウスを利用する人が増えて'
+      'います。ゲストハウスを利用するメリットととしては、1つは費用面です。東京近辺でも家賃が5万円程度'
+      'で済む場合もありますし、賃貸しのアパートやマンションでかかる、敷金や礼金も掛からないことがほとんど'
+      'です。とにかく、家賃を安く済ませたという方には非常におすすめです。'
+      '2つ目は出会いの場になる点です。実家を出て、一人暮らしを始めると最初は友達も出来ず、なかなか心細い'
+      '状態になりがちです。新しい環境で積極的にいろんな人に声を掛けるのも難しいと思います。'
+      'しかしゲストハウスはその家賃の安さから、海外の方、色んな年齢の方が利用しており、家にいながら沢山の人'
+      'とコミュニケーションをとることが出来ます。ゲストハウスで知り合って結婚した、というカップルも少なく'
+      'ありません。女性の方でセキュリティ面で心配に思う方がいれば、女性専用のゲストハウスに住むのもよいでしょう。'
+      'ゲストハウスを利用する際の注意点としては、いろんな方が共同で暮らし、水周りを共有する事になるので、'
+      'そのゲストハウスに設けられたルールに従わなければならないという点です。好きな時間にご飯を作ったりは'
+      '出来ないかもしれませんし、シャワーの設置数が少ない場合は自分の好きなときに入ることはできません。'
+      'もちろん共同で使いますので、汚したり散らかしたりするのはご法度。あとの人が気持ちよく使えるよう、'
+      '共同施設は綺麗に使う必要があります。また、これはゲストハウスに限ったことではありませんが、友達を'
+      '連れてきて夜中まで騒ぐなども出来ません。'
+      'このように一緒に暮らす人に迷惑をかけないように生活しなければなりませんので、自分の思い通りにしたい人'
+      'にはあまり向きません。ゲストハウスは良い点も沢山ありますが、共同生活ならではの注意点もあります。'
+      'ゲストハウスで暮らすことを検討する際には、この暮らしのスタイルが本当に自分にあっているかどうかをまず'
+      '確かめてからにするようにしましょう。'
+    ),
+    plot_name='pos_conn.png',
+  )
