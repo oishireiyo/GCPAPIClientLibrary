@@ -3,6 +3,7 @@ import os
 import sys
 from typing import Union
 
+# Web scraping
 import requests
 import bs4
 from bs4 import BeautifulSoup
@@ -86,21 +87,21 @@ class BeautifulSoupHTMLParser(object):
     return self.soup.select(f'{adj_tag}.contains("{text}") ~ {tag}')
 
   # 要素からテキストのみを取得
-  def get_content(self, element: str, strip: bool=False) -> str:
+  def get_content_from_element(self, element: str, strip: bool=False) -> str:
     return element.get_text(strip=strip)
 
-  def get_contents(self, elements: list[str], strip: bool=False) -> list[str]:
+  def get_contents_from_elements(self, elements: list[str], strip: bool=False) -> list[str]:
     return [element.get_text(strip=strip) for element in elements]
 
   # 要素から属性値のみを取得
-  def get_attribute(self, element: str, attr_name: str) -> str:
+  def get_attribute_from_element(self, element: str, attr_name: str) -> str:
     return element.get(attr_name)
 
-  def get_attributes(self, elements: list[str], attr_name: str) -> list[str]:
+  def get_attributes_from_elements(self, elements: list[str], attr_name: str) -> list[str]:
     return [element.get(attr_name) for element in elements]
 
   # 全てのテキストのみを取得
-  def get_text_without_contamination(self):
+  def get_all_texts(self):
     # script, styleを含む要素を削除する
     for script in self.soup(['script', 'style']):
       script.decompose()
@@ -116,9 +117,22 @@ class BeautifulSoupHTMLParser(object):
 
     return text
 
+  #全てのイメージのみを取得
+  def cutout_filename_without_appendix(self, path: str) -> str:
+    file = os.path.basename(path)
+    file_without_appendix = os.path.splitext(file)[0]
+    return file_without_appendix
+
+  def get_all_images(self, appendix: str='png'):
+    urls = [self.get_attribute_from_element(element=element, attr_name='src') for element in self.get_elements(tag='img')]
+    for url in urls:
+      response = requests.get(url)
+      with open(f'assets/{self.cutout_filename_without_appendix(path=url)}.{appendix}', 'wb') as file:
+        file.write(response.content)
+
 if __name__ == '__main__':
-  parser = BeautifulSoupHTMLParser(url='http://quotes.toscrape.com/')
-  parser.set_soup(html=open())
+  parser = BeautifulSoupHTMLParser(url='https://su-gi-rx.com/archives/976')
   elements = parser.get_elements(tag='a')
-  text = parser.get_text_without_contamination()
+  text = parser.get_all_texts()
   print(text)
+  parser.get_all_images()
