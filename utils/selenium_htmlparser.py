@@ -169,9 +169,33 @@ class SeleniumHTMLParser(object):
 
   # 全てのテキストを取得
   def get_all_texts(self):
+    # script, styleを含む要素を削除する
     elements = self.get_elements_by_xpath(xpath='//*[not(self::script) and not(self::style)]')
-    texts = ''.join([self.get_text_of_element(element=element) for element in elements])
-    print(texts)
+    text = ''.join([self.get_text_of_element(element=element) for element in elements])
+
+    # テキストを改行毎にリストに入れ、リスト内の要素の前後の空白を削除
+    lines = [line.strip() for line in text.splitlines()]
+
+    # リストの空白要素以外を全て文字列に渡す
+    text = '\n'.join(line for line in lines if line)
+
+    return text
+
+  # 全てのテキスト / 位置を取得する
+  def get_all_texts_locations_sizes(self):
+    contents = []
+
+    # script, styleを含む要素を削除する
+    elements = self.get_elements_by_xpath(xpath='//*[not(self::script) and not(self::style)]')
+    for element in elements:
+      text = self.get_text_of_element(element=element)
+      if text:
+        location = self.get_location_of_element(element=element)
+        size = self.get_size_of_element(element=element)
+
+      contents.append((text, location, size))
+
+    return contents
 
   # 全てのイメージのみを取得
   def cutout_filename(self, path: str) -> str:
@@ -182,13 +206,21 @@ class SeleniumHTMLParser(object):
     file_without_appendix = os.path.splitext(file)[0]
     return f'{file_without_appendix}.{appendix}'
 
-  def get_all_images(self, appendix: str='png'):
+  def save_all_images(self, appendix: str='png'):
     elements = self.get_elements_by_tag(tag='img')
     urls = [self.get_attribute_of_element(element=element, attribute='src') for element in elements]
     for url in urls:
       response = requests.get(url)
       with open(f'assets/{self.cutout_filename(path=url)}', 'wb') as file:
         file.write(response.content)
+
+  # ウィンドウサイズを取得する
+  def get_window_size(self) -> None:
+    self.driver.get_window_size()
+
+  # スクリーンショットを取得する
+  def get_screenshot(self, filename: str) -> None:
+    self.driver.get_screenshot_as_file(filename)
 
   # セッションの終了
   def quit(self):
@@ -198,6 +230,10 @@ if __name__ == '__main__':
   parser = SeleniumHTMLParser()
   parser.set_url(url='https://www.selenium.dev/documentation/webdriver/getting_started/first_script/')
   element = parser.get_element_by_tag(tag='p')
-  parser.get_all_images()
+  text = parser.get_all_texts()
+  print(text)
+  parser.save_all_images()
+  contents = parser.get_all_texts_locations_sizes()
+  print(contents)
 
   parser.quit()
